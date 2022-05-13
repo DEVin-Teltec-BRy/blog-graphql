@@ -3,14 +3,17 @@ module.exports = {
     {
       id: "122",
       name: "Mary",
+      followersIds: ["123", "124"],
     },
     {
       id: "123",
       name: "John",
+      followersIds: ["122", "124"],
     },
     {
       id: "124",
       name: "Peter",
+      followersIds: ["123", "122"],
     },
   ],
   posts: [

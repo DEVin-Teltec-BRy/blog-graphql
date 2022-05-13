@@ -19,6 +19,8 @@ type User {
   id: ID
   name: String
   posts: [Post]
+  followers: [User]
+  following: [User]
 }
 
 type Post {
