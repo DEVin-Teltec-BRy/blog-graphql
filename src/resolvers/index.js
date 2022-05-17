@@ -1,52 +1,37 @@
-const { GraphQLScalarType, Kind } = require("graphql");
-const { users, posts } = require("../db");
-
-const dateScalar = new GraphQLScalarType({
-  name: "Date",
-  description: "Date custom scalar type",
-  serialize(value) {
-    return value.getTime(); // Convert outgoing Date to integer for JSON
-  },
-  parseValue(value) {
-    return new Date(value); // Convert incoming integer to Date
-  },
-  parseLiteral(ast) {
-    if (ast.kind === Kind.INT) {
-      return new Date(parseInt(ast.value, 10)); // Convert hard-coded AST string to integer and then to Date
-    }
-    return null; // Invalid hard-coded value (not an integer)
-  },
-});
+const { DateScalar } = require("./scalar");
 
 const resolvers = {
-  Date: dateScalar,
+  Date: DateScalar,
   Query: {
-    user: (_, args) => users.find((user) => user.id === args.id),
-    users: () => users,
-    feed: () => posts,
+    user: async (_, { id }, { db: { User } }) => User.findById(id),
+    users: async (_, __, { db: { User } }) => User.find(),
+    feed: async (parent, args, { db: { Post } }) => Post.find(),
   },
   Mutation: {
-    createPost: (_, args) => {
-      const post = {
-        id: `post-${posts.length + 1}`,
-        title: "Olá Post 1 ",
-        content: args.content,
-        authorId: args.userId,
-        createdAt: new Date(),
-      };
-
-      posts.push(post);
+    createUser: (_, { user }, { db: { User } }) => {
+      return User.create(user);
+    },
+    createPost: async (_, { post }, { db: { Post } }) => {
+      await Post.create(post);
 
       return post;
     },
+    updateUser: (_, { user }, { users }) => {
+      const foundUserIndex = users.findIndex((u) => u.id === user.id);
+      users[foundUserIndex] = user;
+
+      return user;
+    },
   },
   User: {
-    posts: (parent) => posts.filter((post) => post.authorId === parent.id),
-    followers: (parent) =>
+    posts: (parent, args, { posts }) =>
+      posts.filter((post) => post.authorId === parent.id),
+    followers: (parent, args, { users }) =>
       users.filter((user) => user.followersIds.includes(parent.id)),
   },
   Post: {
-    author: (parent) => users.find((user) => user.id === parent.authorId),
+    author: (parent, args, { users }) =>
+      users.find((user) => user.id === parent.authorId),
   },
 };
 
