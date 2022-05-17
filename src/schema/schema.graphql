@@ -7,7 +7,10 @@ type Query {
 }
 
 type Mutation {
-  createPost(content: String!, userId: ID!): Post!
+  createUser(user: UserInput!): User!
+  createPost(post: PostInput!): Post!
+  updateUser(user: UserInput!): User
+  deletePost(postId: ID): String
 }
 
 type Subscription {
@@ -23,6 +26,11 @@ type User {
   following: [User]
 }
 
+input UserInput {
+  id: ID
+  name: String
+}
+
 type Post {
   id: ID
   title: String
@@ -31,6 +39,13 @@ type Post {
   isPublished: Boolean
   author: User
   createdAt: Date
+}
+
+input PostInput {
+  title: String
+  description: String
+  content: String
+  authorId: String
 }
 
 # custom scalar types
