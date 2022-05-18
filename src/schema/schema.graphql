@@ -7,10 +7,12 @@ type Query {
 }
 
 type Mutation {
-  createUser(user: UserInput!): User!
+  createUser(user: UserInput!): AuthPayload!
   createPost(post: PostInput!): Post!
   updateUser(user: UserInput!): User
   deletePost(postId: ID): String
+
+  login(email: String!, password: String!): AuthPayload
 }
 
 type Subscription {
@@ -21,14 +23,16 @@ type Subscription {
 type User {
   id: ID
   name: String
+  email: String
   posts: [Post]
   followers: [User]
   following: [User]
 }
 
 input UserInput {
-  id: ID
   name: String
+  email: String
+  password: String
 }
 
 type Post {
@@ -45,7 +49,11 @@ input PostInput {
   title: String
   description: String
   content: String
-  authorId: String
+}
+
+type AuthPayload {
+  token: String
+  user: User
 }
 
 # custom scalar types
