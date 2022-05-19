@@ -2,7 +2,7 @@ const { MongoDataSource } = require("apollo-datasource-mongodb");
 
 class Posts extends MongoDataSource {
   getFeed() {
-    return this.find();
+    return this.model.find();
   }
 }
 

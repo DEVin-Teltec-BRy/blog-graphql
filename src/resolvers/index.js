@@ -58,8 +58,12 @@ const resolvers = {
         throw new Error("Usuário não identificado");
       }
       console.log({ userId });
-
-      await Post.create({ ...post, author: userId });
+      try {
+        await Post.create({ ...post, author: userId });
+      } catch (error) {
+        console.log({ error });
+        throw new Error("Erro ao criar post.");
+      }
 
       return post;
     },
