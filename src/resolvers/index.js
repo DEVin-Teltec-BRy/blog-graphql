@@ -53,19 +53,22 @@ const resolvers = {
         user,
       };
     },
-    createPost: async (_, { post }, { db: { Post }, userId }) => {
+    createPost: async (_, { post }, { db: { Post }, userId, pubsub }) => {
       if (!userId) {
         throw new Error("Usuário não identificado");
       }
-      console.log({ userId });
       try {
-        await Post.create({ ...post, author: userId });
+        const newPost = await Post.create({ ...post, author: userId });
+
+        pubsub.publish("POST_CREATED", {
+          newPost,
+        });
+
+        return newPost;
       } catch (error) {
         console.log({ error });
         throw new Error("Erro ao criar post.");
       }
-
-      return post;
     },
     updateUser: (_, { user }, { users }) => {
       const foundUserIndex = users.findIndex((u) => u.id === user.id);
@@ -81,8 +84,18 @@ const resolvers = {
       users.filter((user) => user.followersIds.includes(parent.id)),
   },
   Post: {
-    author: (parent, args, { users }) =>
-      users.find((user) => user.id === parent.authorId),
+    author: (parent, args, { dataSources: { users } }) =>
+      users.getUser(parent.author),
+  },
+  Subscription: {
+    newPost: {
+      subscribe: (parent, args, { pubsub, userId }, info) => {
+        if (!userId) {
+          throw new Error("Usuário não identificado");
+        }
+        return pubsub.asyncIterator(["POST_CREATED"]);
+      },
+    },
   },
 };
 

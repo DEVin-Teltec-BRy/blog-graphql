@@ -4,6 +4,7 @@ type Query {
   users: [User!]!
   user(id: ID!): User
   feed(last: Int): [Post!]!
+  search(input: String!): [SearchResult!]!
 }
 
 type Mutation {
@@ -27,6 +28,16 @@ type User {
   posts: [Post]
   followers: [User]
   following: [User]
+}
+
+enum Filter {
+  ASC
+  DESC
+}
+
+enum Order {
+  ORDENACAO
+  POPULARIDADE
 }
 
 input UserInput {
@@ -58,3 +69,5 @@ type AuthPayload {
 
 # custom scalar types
 scalar Date
+
+union SearchResult = User | Post
